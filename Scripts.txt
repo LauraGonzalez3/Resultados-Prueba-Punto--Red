@@ -1,0 +1,107 @@
+Scripts
+
+2.2	Escribe una consulta para obtener los 5 clientes con mayor monto total de ventas en los últimos 6 meses. (5 puntos)  
+SELECT c.nombre, c.apellido, SUM (v.monto) AS total_ventas
+FROM clientes c
+JOIN ventas v ON c.id = v.cliente_id
+WHERE v.fecha >= CURRENT_DATE - INTERVAL '6 months'
+GROUP BY c.id
+ORDER BY total_ventas DESC
+LIMIT 5;
+
+2.3 	Escribe una consulta para obtener el nombre completo de los clientes y su monto total de ventas.
+SELECT c.nombre, c.apellido, SUM(v.monto) AS mt_ventas
+FROM clientes c
+JOIN ventas v ON c.id = v.cliente_id
+GROUP BY c.id;
+2.4	Escribe una consulta para obtener el ingreso promedio de ventas por mes. (10 puntos)
+SELECT DATE_TRUNC ('month', v.fecha) AS mes, AVG (v.monto) AS promedio ventas
+FROM ventas v
+GROUP BY mes
+ORDER BY mes;
+2.5 Escribe una consulta para calcular el ranking de clientes por ventas en el último año.
+SELECT
+    c.nombre,
+    c.apellido,
+    SUM(v.monto) AS total_ventas,
+    RANK() OVER (ORDER BY SUM(v.monto) DESC) AS ranking_ventas
+FROM clientes c
+JOIN ventas v ON c.id = v.cliente_id
+WHERE v.fecha >= CURRENT_DATE - INTERVAL '1 year'
+GROUP BY c.id
+ORDER BY total_ventas DESC;
+
+
+
+
+2.6 Escribe una consulta para calcular el total de ventas por cliente y luego selecciona solo los clientes cuyo total de ventas es superior al promedio general.
+SELECT
+    c.nombre,
+    c.apellido,
+    SUM(v.monto) AS total_ventas
+FROM clientes c
+JOIN ventas v ON c.id = v.cliente_id
+GROUP BY c.id
+HAVING SUM(v.monto) > (
+    SELECT AVG(total_ventas)
+    FROM (
+        SELECT SUM (v.monto) AS total_ventas
+        FROM ventas v
+        GROUP BY v.cliente_id
+    ) AS v.procliente
+);
+
+Sección 3: Python (15 puntos)
+Resultado
+Lea el archivo CSV. 
+	
+Import csv
+
+def leer_datos_ventas (nombre archivo):
+
+    datos_ventas = []
+
+    try:
+        with open(nombre_archivo, 'r', newline='', encoding='utf-8') as archivo_csv:
+            lector_csv = csv.DictReader(archivo_csv)
+            for fila in lector_csv:
+                datos_ventas.append(fila)
+
+    return datos_ventas
+
+
+ Calcule el total de ventas por producto. 
+
+import csv
+
+def calcular_ventas_producto(nombre_archivo):
+    ventas_por_producto = {}
+    with open(nombre_archivo, 'r') as archivo:
+        lector = csv.DictReader(archivo)
+        for fila in lector:
+            producto = fila ['producto']
+            cantidad = int(fila['cantidad'])
+            precio = float(fila['precio_unitario'])
+            total = cantidad * precio
+            if producto in ventas_por_producto:
+                ventas_por_producto [producto] += total
+            else:
+                ventas_por_producto[producto] = total
+    return ventas_por_producto
+
+
+Genere un archivo resumen_ventas.csv con los resultados. 
+
+def guardar_resumen(ventas, nombre_archivo_resumen): 
+with open(nombre_archivo_resumen, 'w', newline='') as archivo_resumen:	 escritor = csv.writer(archivo_resumen) 
+escritor.writerow(['Producto', 'Total Ventas']) 
+for producto, total in ventas.items():
+ escritor.writerow([producto, total]) 
+ventas = calcular_ventas_producto('datos_ventas.csv') 
+guardar_resumen(ventas, 'resumen_ventas.csv')
+
+
+
+
+
+
